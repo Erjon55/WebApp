@@ -75,6 +75,9 @@ namespace App.Web.Data.Migrations
                     b.Property<Guid>("ShoppingCartId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
                     b.HasKey("ProductId", "ShoppingCartId");
 
                     b.HasIndex("ShoppingCartId");
@@ -97,7 +100,7 @@ namespace App.Web.Data.Migrations
                         .IsUnique()
                         .HasFilter("[OwnerId] IS NOT NULL");
 
-                    b.ToTable("ShoppingCart");
+                    b.ToTable("ShoppingCarts");
                 });
 
             modelBuilder.Entity("App.Web.Models.Identity.WebAppUser", b =>
@@ -318,14 +321,14 @@ namespace App.Web.Data.Migrations
 
             modelBuilder.Entity("App.Web.Models.Domain.ProductInShoppingCart", b =>
                 {
-                    b.HasOne("App.Web.Models.Domain.ShoppingCart", "ShoppingCart")
-                        .WithMany("productInShoppingCarts")
+                    b.HasOne("App.Web.Models.Domain.Product", "Product")
+                        .WithMany("ProductInShoppingCarts")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("App.Web.Models.Domain.Product", "Product")
-                        .WithMany("productInShoppingCarts")
+                    b.HasOne("App.Web.Models.Domain.ShoppingCart", "ShoppingCart")
+                        .WithMany("ProductInShoppingCarts")
                         .HasForeignKey("ShoppingCartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

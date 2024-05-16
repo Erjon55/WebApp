@@ -10,6 +10,6 @@ namespace App.Web.Models.Domain
         public Guid Id { get; set; }
         public string OwnerId { get; set; }
         public WebAppUser Owner { get; set; }  
-        public virtual ICollection<ProductInShoppingCart> productInShoppingCarts { get; set; }  
+        public virtual ICollection<ProductInShoppingCart> ProductInShoppingCarts { get; set; }  
     }
 }

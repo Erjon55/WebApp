@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using App.Web.Data;
 using App.Web.Models.Domain;
+using System.Security.Claims;
+using App.Web.Models.Domain.DTO;
 
 namespace App.Web.Controllers
 {
@@ -23,6 +25,58 @@ namespace App.Web.Controllers
         public async Task<IActionResult> Index()
         {
             return View(await _context.Products.ToListAsync());
+        }
+
+        public async Task<IActionResult> AddProductToCart(Guid? id)
+        {
+            var product = await _context.Products.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
+            AddToShoppingCartDto model = new AddToShoppingCartDto
+            {
+                SelectedProduct = product,
+                ProductId = product.Id,
+                Quantity = 1
+
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddProductToCart([Bind("ProductId, Quantity")] AddToShoppingCartDto item)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userShoppingCart = await _context.ShoppingCarts.Where(x => x.OwnerId.Equals(userId)).FirstOrDefaultAsync();
+            if (item.ProductId != null && userShoppingCart != null)
+            {
+                var product = await _context.Products.Where(x => x.Id.Equals(item.ProductId)).FirstOrDefaultAsync();
+                if (product != null)
+                {
+                    ProductInShoppingCart productToAdd = new ProductInShoppingCart
+                    {
+                        Product = product,
+                        ProductId = product.Id,
+                        ShoppingCart = userShoppingCart,
+                        ShoppingCartId = userShoppingCart.Id,
+                        Quantity = item.Quantity
+
+                    };
+
+                    var existingProduct = _context.ProductInShoppingCarts.FirstOrDefault(x => x.ProductId.Equals(productToAdd.ProductId));
+                    if (existingProduct != null)
+                    {
+                        existingProduct.Quantity += item.Quantity;
+                        _context.Update(existingProduct);
+                    }
+                    else
+                    {
+                        _context.Add(productToAdd);
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+                return RedirectToAction("Index", "Products");
+            }
+            return View(item);
         }
 
         // GET: Products/Details/5
@@ -63,7 +117,7 @@ namespace App.Web.Controllers
             if (ModelState.IsValid)
             {
                 product.Id = Guid.NewGuid();
-                product.Categories =  new List<Category> { _context.Categories.Find(product.CategoryId) };
+                product.Categories = new List<Category> { _context.Categories.Find(product.CategoryId) };
                 _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

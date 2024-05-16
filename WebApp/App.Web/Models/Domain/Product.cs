@@ -13,6 +13,6 @@ namespace App.Web.Models.Domain
         public double Price { get; set; }
         public Guid CategoryId { get; set; }
         public IEnumerable<Category> Categories { get; set; }
-        public virtual ICollection<ProductInShoppingCart> productInShoppingCarts { get; set; }
+        public virtual ICollection<ProductInShoppingCart> ProductInShoppingCarts { get; set; }
     }
 }

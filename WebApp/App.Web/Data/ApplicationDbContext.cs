@@ -17,6 +17,7 @@ namespace App.Web.Data
 
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }  
         public virtual DbSet<ProductInShoppingCart> ProductInShoppingCarts { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -38,14 +39,15 @@ namespace App.Web.Data
                 .HasKey(z=> new {z.ProductId,z.ShoppingCartId});
 
             builder.Entity<ProductInShoppingCart>()
-                .HasOne(z => z.Product)
-                .WithMany(z => z.productInShoppingCarts)
-                .HasForeignKey(z=>z.ShoppingCartId);
+             .HasOne(z => z.Product)
+             .WithMany(z => z.ProductInShoppingCarts)
+             .HasForeignKey(z => z.ProductId);
 
             builder.Entity<ProductInShoppingCart>()
                 .HasOne(z => z.ShoppingCart)
-                .WithMany(z => z.productInShoppingCarts)
-                .HasForeignKey(z => z.ProductId);
+                .WithMany(z => z.ProductInShoppingCarts)
+                .HasForeignKey(z => z.ShoppingCartId);
+
 
             builder.Entity<ShoppingCart>()
                 .HasOne<WebAppUser>(z => z.Owner)
